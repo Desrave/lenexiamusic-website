@@ -1,0 +1,24 @@
+name: Deploy to lenexiamusic.com
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deployment via HTTPS
+        run: |
+          status=$(curl -s -o /tmp/deploy_out.txt -w "%{http_code}" \
+            -X POST \
+            -H "X-Deploy-Token: ${{ secrets.DEPLOY_TOKEN }}" \
+            https://lenexiamusic.com/_deploy.php)
+          echo "--- server response ---"
+          cat /tmp/deploy_out.txt
+          echo ""
+          if [ "$status" != "200" ]; then
+            echo "Deploy failed — HTTP $status"
+            exit 1
+          fi
+          echo "Deploy successful"
